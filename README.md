@@ -1,3 +1,4 @@
+
 # Strata Coffee — Website
 
 Cafe website dengan estetika **brutalist asphalt** untuk Strata Coffee (Bandungan, Semarang — 720m altitude).
@@ -122,3 +123,4 @@ Panel admin bisa mengedit:
 - **Info Cafe** — alamat, jam buka, WhatsApp, Instagram, TikTok, koordinat
 
 Semua perubahan disimpan di `src/data/site-content.json` dan langsung terlihat setelah refresh halaman.
+
