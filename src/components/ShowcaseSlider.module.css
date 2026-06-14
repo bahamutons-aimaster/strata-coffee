@@ -1,0 +1,271 @@
+/* ── ShowcaseSlider — Full-width crossfade slider ────── */
+
+.section {
+  position: relative;
+  width: 100%;
+  height: 88vh;
+  min-height: 560px;
+  max-height: 900px;
+  overflow: hidden;
+  background: var(--asphalt-0);
+  /* Allow horizontal swipe without blocking vertical scroll */
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Slide stack — crossfade */
+.track {
+  position: absolute;
+  inset: 0;
+}
+
+.slide {
+  position: absolute;
+  inset: 0;
+}
+
+/* Fade out old slide */
+.slideOut {
+  opacity: 1;
+  animation: fadeOut 0.9s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  z-index: 1;
+}
+
+/* Fade in new slide + subtle Ken Burns zoom */
+.slideIn {
+  opacity: 0;
+  animation: fadeIn 0.9s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  z-index: 2;
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.img {
+  object-fit: cover;
+  object-position: center;
+  animation: kenBurns 12s ease-in-out forwards;
+  will-change: transform;
+}
+@keyframes kenBurns {
+  from { transform: scale(1.0); }
+  to   { transform: scale(1.06); }
+}
+
+/* Dark gradient overlay */
+.overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    rgba(10, 10, 11, 0.78) 0%,
+    rgba(10, 10, 11, 0.45) 50%,
+    rgba(10, 10, 11, 0.2) 100%
+  );
+  z-index: 3;
+}
+
+/* Grit */
+.grit {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  background-size: 180px;
+  pointer-events: none;
+}
+
+/* Content layer */
+.content {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding-bottom: clamp(72px, 10vh, 120px);
+  pointer-events: none;
+}
+
+/* Copy — animate in per slide */
+.copy {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  max-width: 640px;
+  pointer-events: auto;
+  animation: copyIn 0.7s 0.15s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@keyframes copyIn {
+  from { opacity: 0; transform: translateY(22px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.eyebrow {
+  font-size: 0.72rem;
+  letter-spacing: 0.26em;
+  color: var(--marking);
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.eyebrow::before {
+  content: '';
+  display: block;
+  width: 24px;
+  height: 2px;
+  background: var(--marking);
+}
+
+.title {
+  font-size: clamp(44px, 7vw, 102px);
+  line-height: 0.96;
+  color: var(--paper);
+  letter-spacing: -0.02em;
+}
+
+.subtitle {
+  font-size: clamp(0.98rem, 1.2vw, 1.14rem);
+  line-height: 1.7;
+  color: rgba(244, 243, 239, 0.78);
+  max-width: 46ch;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+
+.cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 28px;
+  background: var(--marking);
+  color: var(--asphalt-0);
+  font-family: var(--font-display);
+  font-size: 1rem;
+  letter-spacing: 0.06em;
+  text-decoration: none;
+  transition: box-shadow 0.3s, transform 0.3s;
+}
+.cta:hover { box-shadow: 0 10px 32px rgba(245,185,21,0.45); transform: translateY(-2px); }
+.arrow { display: inline-block; transition: transform 0.4s var(--ease-out); }
+.cta:hover .arrow { transform: translateX(5px); }
+
+.price {
+  font-family: var(--font-mono);
+  font-size: 0.88rem;
+  letter-spacing: 0.12em;
+  color: rgba(244, 243, 239, 0.65);
+}
+
+/* Slide counter (top right) */
+.counter {
+  position: absolute;
+  top: calc(var(--nav-h) + 32px);
+  right: var(--gutter);
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  pointer-events: none;
+}
+.counterCurrent {
+  font-size: 2.6rem;
+  color: var(--paper);
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+.counterSep { font-size: 0.9rem; color: var(--concrete); }
+.counterTotal { font-size: 0.9rem; color: var(--concrete); }
+
+/* Arrow buttons */
+.arrow_btn {
+  position: absolute;
+  top: 50%;
+  z-index: 6;
+  transform: translateY(-50%);
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: rgba(10, 10, 11, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(8px);
+  color: var(--paper);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: background 0.25s, border-color 0.25s, transform 0.25s;
+  opacity: 0;
+}
+.section:hover .arrow_btn { opacity: 1; }
+.arrow_btn:hover {
+  background: var(--marking);
+  border-color: transparent;
+  color: var(--asphalt-0);
+}
+.arrow_btn svg { width: 22px; height: 22px; }
+.arrow_prev { left: clamp(12px, 2.5vw, 36px); }
+.arrow_next { right: clamp(12px, 2.5vw, 36px); }
+
+/* Progress dots */
+.dots {
+  position: absolute;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 6;
+  display: flex;
+  gap: 6px;
+  pointer-events: auto;
+}
+.dot {
+  position: relative;
+  height: 3px;
+  width: 40px;
+  background: rgba(244, 243, 239, 0.22);
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  overflow: hidden;
+  transition: width 0.35s var(--ease-out), background 0.35s;
+}
+.dot[aria-selected='true'] { width: 72px; }
+.dot[aria-selected='true']:hover,
+.dot:hover { background: rgba(244, 243, 239, 0.35); }
+
+/* Progress fill animation */
+.dotFill {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  background: var(--marking);
+  animation: dotProgress linear;
+  width: 0%;
+}
+@keyframes dotProgress {
+  from { width: 0%; }
+  to   { width: 100%; }
+}
+
+/* Mobile */
+@media (max-width: 700px) {
+  .section { height: 75vh; min-height: 440px; }
+  .title { font-size: clamp(38px, 11vw, 64px); }
+  .counter { top: calc(var(--nav-h) + 16px); right: var(--gutter); }
+  .counterCurrent { font-size: 1.8rem; }
+  .dots { bottom: 20px; }
+  .dot { width: 28px; }
+  .dot[aria-selected='true'] { width: 52px; }
+  .arrow_btn { width: 40px; height: 40px; opacity: 0.7; }
+}

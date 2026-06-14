@@ -1,0 +1,298 @@
+/* ── HERO: Product image slider + animated headline ──────────────── */
+.hero {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-top: var(--nav-h);
+  overflow: hidden;
+}
+
+/* Big ghost "S" watermark */
+.watermark {
+  position: absolute;
+  right: -2vw;
+  bottom: -4vw;
+  font-family: var(--font-display);
+  font-size: clamp(280px, 36vw, 520px);
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: rgba(255,255,255,0.025);
+  pointer-events: none;
+  user-select: none;
+  z-index: 0;
+}
+
+/* 2-col layout */
+.grid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(32px, 5vw, 80px);
+  align-items: center;
+  min-height: calc(100vh - var(--nav-h));
+  padding-block: 40px 60px;
+}
+
+/* LEFT: teks */
+.copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.eyebrow {
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.title {
+  font-size: clamp(56px, 8.5vw, 130px);
+  line-height: 0.96;
+  letter-spacing: -0.02em;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.line {
+  display: block;
+  color: var(--paper);
+}
+.lineAccent {
+  color: var(--marking);
+}
+
+.lead {
+  margin-top: 28px;
+  font-size: clamp(1rem, 1.15vw, 1.12rem);
+  line-height: 1.7;
+  color: var(--concrete);
+  max-width: 42ch;
+}
+
+.actions {
+  margin-top: 36px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--fog);
+  font-size: 0.88rem;
+  font-family: var(--font-mono);
+  letter-spacing: 0.1em;
+  text-decoration: none;
+  text-transform: uppercase;
+  transition: color 0.3s;
+}
+.secondary:hover { color: var(--paper); }
+.secondaryDot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--marking);
+  box-shadow: 0 0 10px var(--marking-glow);
+}
+
+.stats {
+  margin-top: 48px;
+  padding-top: 32px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  display: grid;
+  grid-template-columns: repeat(4, auto);
+  gap: 32px;
+  justify-content: start;
+  list-style: none;
+}
+.stats dt {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.2em;
+  color: var(--concrete);
+  margin-bottom: 4px;
+}
+.stats dd {
+  font-family: var(--font-display);
+  font-size: clamp(1.4rem, 2.2vw, 2.2rem);
+  color: var(--paper);
+  letter-spacing: 0.02em;
+  line-height: 1;
+}
+.unit {
+  font-size: 0.6em;
+  color: var(--marking);
+  letter-spacing: 0.14em;
+}
+
+/* RIGHT: product image slider */
+.visual {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.visualFrame {
+  position: relative;
+  width: 100%;
+  max-width: 520px;
+  aspect-ratio: 3/4;
+  border-radius: 4px;
+  overflow: hidden;
+  background: var(--asphalt-1);
+}
+
+.blobGlow {
+  position: absolute;
+  inset: -40px;
+  background: radial-gradient(ellipse at 60% 50%,
+    rgba(245,185,21,0.12) 0%,
+    rgba(245,185,21,0.04) 40%,
+    transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Slide */
+.slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.9s var(--ease-out);
+  z-index: 1;
+}
+.slideActive {
+  opacity: 1;
+  z-index: 2;
+}
+.slideImg {
+  object-fit: cover;
+  object-position: center;
+  transition: transform 8s ease;
+}
+.slideActive .slideImg { transform: scale(1.04); }
+
+/* Product label bawah gambar */
+.productLabel {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  align-self: flex-start;
+  padding-left: 8px;
+}
+.productPrice {
+  font-size: 0.8rem;
+  letter-spacing: 0.14em;
+  color: var(--marking);
+}
+.productName {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  letter-spacing: 0.04em;
+  color: var(--paper);
+}
+
+/* Dots pagination */
+.dots {
+  display: flex;
+  gap: 8px;
+  align-self: flex-start;
+  padding-left: 8px;
+}
+.dot {
+  width: 28px;
+  height: 3px;
+  border-radius: 2px;
+  background: rgba(255,255,255,0.2);
+  cursor: pointer;
+  transition: background 0.35s, width 0.35s;
+  border: none;
+}
+.dotActive {
+  background: var(--marking);
+  width: 44px;
+}
+
+/* Side label vertical */
+.sideLabel {
+  position: absolute;
+  right: -52px;
+  top: 50%;
+  transform: translateY(-50%) rotate(90deg);
+  transform-origin: center;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.22em;
+  color: var(--concrete);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+/* Scroll cue */
+.scrollCue {
+  position: absolute;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.24em;
+  color: var(--concrete);
+}
+.scrollCueLine {
+  display: block;
+  width: 1px;
+  height: 44px;
+  background: linear-gradient(180deg, var(--concrete) 0%, transparent 100%);
+  animation: scrollPulse 2.5s ease-in-out infinite;
+}
+@keyframes scrollPulse {
+  0%, 100% { opacity: 0.3; transform: scaleY(1); }
+  50% { opacity: 1; transform: scaleY(0.6); }
+}
+
+/* Fade-in animation per slide change */
+.fadeItem {
+  animation: fadeUp 0.7s var(--ease-out) both;
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@media (max-width: 980px) {
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 40px;
+    padding-block: 32px 48px;
+  }
+  .copy { order: 2; }
+  .visual { order: 1; }
+  .visualFrame { max-width: 340px; aspect-ratio: 1/1.15; }
+  .sideLabel { display: none; }
+  .stats { grid-template-columns: repeat(2, auto); gap: 20px 36px; }
+  .title { font-size: clamp(52px, 12vw, 80px); }
+}
+
+@media (max-width: 560px) {
+  .title { font-size: clamp(44px, 13vw, 64px); }
+  .stats { grid-template-columns: repeat(4, auto); gap: 12px 20px; }
+  .actions { gap: 16px; }
+  .scrollCue { display: none; }
+}

@@ -1,0 +1,47 @@
+/* Strata Admin — Global Variables + Fonts
+   Import di globals.css: @import '../app/admin/admin-vars.css';
+*/
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --sa-gold:        #C9A84C;
+  --sa-gold-light:  #E8C96A;
+  --sa-gold-dim:    rgba(201,168,76,0.14);
+  --sa-gold-glow:   rgba(201,168,76,0.07);
+  --sa-gold-border: rgba(201,168,76,0.22);
+
+  --sa-bg0: #061008;
+  --sa-bg1: #0a1510;
+  --sa-bg2: rgba(255,255,255,0.04);
+  --sa-bg3: rgba(0,0,0,0.28);
+  --sa-bg4: rgba(0,0,0,0.38);
+
+  --sa-border:  rgba(255,255,255,0.07);
+  --sa-border2: rgba(255,255,255,0.11);
+  --sa-border3: rgba(255,255,255,0.16);
+
+  --sa-text1: #F5F2EB;
+  --sa-text2: #9A9590;
+  --sa-text3: rgba(255,255,255,0.32);
+  --sa-text4: rgba(255,255,255,0.16);
+
+  --sa-green:  #4CAF72;
+  --sa-blue:   #4A8EC9;
+  --sa-red:    #C94A4A;
+  --sa-purple: #9B7EC9;
+
+  --sa-radius-sm: 7px;
+  --sa-radius-md: 10px;
+  --sa-radius-lg: 14px;
+
+  /* Poppins untuk semua — display dan body sama */
+  --sa-font-display: 'Poppins', -apple-system, sans-serif;
+  --sa-font-body:    'Poppins', -apple-system, sans-serif;
+  --sa-font-mono:    'Poppins', monospace;
+
+  --sa-sidebar-w: 80px;
+}
+
+@media (max-width: 900px) {
+  :root { --sa-sidebar-w: 100%; }
+}

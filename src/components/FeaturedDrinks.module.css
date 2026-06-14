@@ -1,0 +1,138 @@
+/* ── FeaturedDrinks — spacing seimbang dengan ShowcaseSlider ─── */
+.section { color: var(--asphalt-0); }
+
+/* Head section — padding vertikal seimbang dengan slider di atas */
+.head {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(24px, 4vw, 60px);
+  align-items: end;
+  padding-top: clamp(64px, 8vh, 100px);
+  padding-bottom: clamp(40px, 5vh, 64px);
+}
+.title {
+  font-size: clamp(40px, 5.5vw, 80px);
+  margin-top: 18px;
+  line-height: 0.96;
+}
+.titleAccent { color: var(--concrete); }
+.lead {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--asphalt-1);
+  max-width: 42ch;
+  align-self: end;
+}
+
+/* 4-col card grid — mepet ke edge container */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: rgba(10,10,11,0.08);
+  border: 1px solid rgba(10,10,11,0.08);
+}
+
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: var(--paper);
+  text-decoration: none;
+  overflow: hidden;
+  transition: transform 0.45s var(--ease-out);
+}
+.card:hover { z-index: 2; transform: translateY(-6px); box-shadow: 0 16px 48px rgba(10,10,11,0.12); }
+
+.cardIdx {
+  position: absolute;
+  top: 14px; left: 14px;
+  z-index: 3;
+  font-size: 0.64rem;
+  letter-spacing: 0.18em;
+  color: rgba(244,243,239,0.6);
+  mix-blend-mode: difference;
+}
+
+.cardImg {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  background: var(--asphalt-1);
+}
+.cardImgInner {
+  object-fit: cover;
+  object-position: center;
+  transition: transform 0.6s var(--ease-out);
+}
+.card:hover .cardImgInner { transform: scale(1.05); }
+.cardImgOverlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, transparent 55%, rgba(10,10,11,0.22) 100%);
+}
+
+.cardSwatch {
+  aspect-ratio: 3 / 4;
+  transition: transform 0.6s var(--ease-out);
+}
+.card:hover .cardSwatch { transform: scale(1.05); }
+
+.cardMeta {
+  padding: 18px 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+.cardName {
+  font-family: var(--font-display);
+  font-size: clamp(1rem, 1.5vw, 1.4rem);
+  letter-spacing: 0.02em;
+  color: var(--asphalt-0);
+  line-height: 1.15;
+}
+.cardDesc {
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: var(--concrete);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  flex: 1;
+}
+.cardFoot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(10,10,11,0.07);
+}
+.cardPrice {
+  font-size: 0.76rem;
+  letter-spacing: 0.1em;
+  color: var(--asphalt-0);
+}
+.cardArrow {
+  color: var(--marking);
+  font-size: 1.1rem;
+  transition: transform 0.35s var(--ease-out);
+}
+.card:hover .cardArrow { transform: translateX(5px); }
+
+/* CTA bawah */
+.cta { padding-block: clamp(40px, 5vh, 64px) clamp(64px, 8vh, 100px); }
+
+/* Tablet */
+@media (max-width: 900px) {
+  .head { grid-template-columns: 1fr; gap: 16px; }
+  .grid { grid-template-columns: repeat(2, 1fr); }
+}
+/* Mobile */
+@media (max-width: 480px) {
+  .head { padding-top: 48px; padding-bottom: 32px; }
+  .grid { grid-template-columns: repeat(2, 1fr); }
+  .cardMeta { padding: 12px 12px 14px; }
+  .cta { padding-block: 32px 56px; }
+}
