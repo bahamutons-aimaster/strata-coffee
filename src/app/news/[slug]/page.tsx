@@ -7,9 +7,10 @@ export async function generateStaticParams() {
   return articles.map((a) => ({ slug: a.slug }));
 }
 
-export async function generateMetadata({ params }: { params: { slug: string } }) {
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
   const { articles } = getContent();
-  const article = articles.find((a) => a.slug === params.slug);
+  const article = articles.find((a) => a.slug === slug);
   if (!article) return {};
   return {
     title: `${article.title} — Strata Coffee`,
@@ -17,9 +18,10 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   };
 }
 
-export default function ArticlePage({ params }: { params: { slug: string } }) {
+export default async function ArticlePage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
   const { articles } = getContent();
-  const article = articles.find((a) => a.slug === params.slug);
+  const article = articles.find((a) => a.slug === slug);
   if (!article) notFound();
 
   const related = articles
