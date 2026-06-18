@@ -435,7 +435,7 @@ function SiteEditor({ site, onChange }: { site: SiteInfo; onChange: (s: SiteInfo
           {fields.map(([key, label]) => (
             <label key={key} className={s.label}>
               {label}
-              <input className={s.input} value={(site as Record<string, string>)[key] ?? ''} onChange={(e) => upd({ [key]: e.target.value })} />
+              <input className={s.input} value={(site as unknown as Record<string, string>)[key] ?? ''} onChange={(e) => upd({ [key]: e.target.value })} />
             </label>
           ))}
         </div>
