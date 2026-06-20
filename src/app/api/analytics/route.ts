@@ -1,17 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAnalyticsSummary, trackPageview } from '@/lib/analytics';
-import { cookies } from 'next/headers';
-
-async function isAuthed() {
-  const cookieStore = await cookies();
-  const c = cookieStore.get('sc_admin');
-  return c?.value === (process.env.ADMIN_TOKEN ?? 'strata2026');
-}
+import { isAuthed } from '@/lib/auth';
 
 /** GET — admin: ambil summary analytics */
 export async function GET() {
-  if (!await isAuthed()) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  return NextResponse.json(getAnalyticsSummary(30));
+  if (!(await isAuthed())) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+  const summary = await getAnalyticsSummary(30);
+  return NextResponse.json(summary);
 }
 
 /** POST — catat pageview (dipanggil dari client saat halaman load) */
@@ -26,7 +23,7 @@ export async function POST(req: NextRequest) {
     const ref = body.ref ?? 'direct';
     const pagePath = body.path ?? '/';
 
-    trackPageview({ path: pagePath, ip, ua, ref });
+    await trackPageview({ path: pagePath, ip, ua, ref });
     return NextResponse.json({ ok: true });
   } catch {
     return NextResponse.json({ ok: false });

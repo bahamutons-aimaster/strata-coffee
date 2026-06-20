@@ -1,9 +1,8 @@
 import 'server-only';
-import fs from 'fs';
-import path from 'path';
+import { readJson, writeJson } from './blob';
 
 // =========================================================
-//  TIPE DATA
+//  TIPE DATA  (sama persis seperti sebelumnya, tidak berubah)
 // =========================================================
 
 export type HeroSlide = {
@@ -113,7 +112,7 @@ export type SiteContent = {
 };
 
 // =========================================================
-//  DEFAULT / SEED CONTENT
+//  DEFAULT / SEED CONTENT  (sama persis seperti sebelumnya)
 // =========================================================
 
 export const DEFAULT_CONTENT: SiteContent = {
@@ -400,7 +399,7 @@ export const DEFAULT_CONTENT: SiteContent = {
       slug: 'mengapa-ketinggian-mengubah-rasa-kopi',
       title: 'Mengapa Ketinggian Mengubah Rasa Kopi',
       excerpt: 'Di 720 meter di atas permukaan laut, air mendidih pada suhu berbeda. Itu mengubah segalanya — dari ekstraksi hingga tekstur foam di permukaan latte kamu.',
-      content: '## Air mendidih lebih cepat di ketinggian\n\nDi permukaan laut, air mendidih pada 100\u00b0C. Di Bandungan — 720 meter di atas laut — air mendidih pada sekitar 98\u00b0C. Dua derajat. Kedengarannya kecil, tapi bagi barista, itu signifikan.\n\n## Ekstraksi yang lebih lembut\n\nSuhu air yang lebih rendah berarti proses ekstraksi kopi berlangsung sedikit lebih lambat. Senyawa yang larut pertama kali — asam, gula, minyak aromatik — keluar dalam urutan yang berbeda dibanding di dataran rendah.\n\nHasilnya: kopi yang secara alami lebih ringan di bagian tengah rasa, dengan keasaman yang lebih nyata dan finish yang lebih bersih.\n\n## Apa yang kami lakukan berbeda\n\nKami menyesuaikan grind size sedikit lebih kasar dari standar cafe di kota. Ini mengkompensasi perbedaan suhu supaya rasio ekstraksi tetap seimbang.\n\nKami juga mengandalkan biji dari ketinggian tinggi — Toraja 1.500m, Gayo 1.200m — karena biji dari elevasi tinggi cenderung memiliki kepadatan yang cocok untuk kondisi brewing di sini.\n\n## Foam yang berbeda\n\nTekanan udara yang lebih rendah juga mempengaruhi cara susu di-steam. Gelembung cenderung lebih besar, lebih mudah pecah. Barista kami belajar menyesuaikan sudut pitcher dan durasi steaming untuk mendapat mikro-foam yang tetap lembut.\n\nJadi kalau kamu pernah merasa kopi di Strata rasanya "lebih ringan" dari tempat lain — itu bukan perasaan kamu. Itu fisika.',
+      content: '## Air mendidih lebih cepat di ketinggian\n\nDi permukaan laut, air mendidih pada 100°C. Di Bandungan — 720 meter di atas laut — air mendidih pada sekitar 98°C. Dua derajat. Kedengarannya kecil, tapi bagi barista, itu signifikan.\n\n## Ekstraksi yang lebih lembut\n\nSuhu air yang lebih rendah berarti proses ekstraksi kopi berlangsung sedikit lebih lambat. Senyawa yang larut pertama kali — asam, gula, minyak aromatik — keluar dalam urutan yang berbeda dibanding di dataran rendah.\n\nHasilnya: kopi yang secara alami lebih ringan di bagian tengah rasa, dengan keasaman yang lebih nyata dan finish yang lebih bersih.\n\n## Apa yang kami lakukan berbeda\n\nKami menyesuaikan grind size sedikit lebih kasar dari standar cafe di kota. Ini mengkompensasi perbedaan suhu supaya rasio ekstraksi tetap seimbang.\n\nKami juga mengandalkan biji dari ketinggian tinggi — Toraja 1.500m, Gayo 1.200m — karena biji dari elevasi tinggi cenderung memiliki kepadatan yang cocok untuk kondisi brewing di sini.\n\n## Foam yang berbeda\n\nTekanan udara yang lebih rendah juga mempengaruhi cara susu di-steam. Gelembung cenderung lebih besar, lebih mudah pecah. Barista kami belajar menyesuaikan sudut pitcher dan durasi steaming untuk mendapat mikro-foam yang tetap lembut.\n\nJadi kalau kamu pernah merasa kopi di Strata rasanya "lebih ringan" dari tempat lain — itu bukan perasaan kamu. Itu fisika.',
       coverImage: '/assets/photos/rooftop-view.png',
       category: 'kopi',
       author: 'Tim Strata',
@@ -489,37 +488,33 @@ export const DEFAULT_CONTENT: SiteContent = {
 };
 
 // =========================================================
-//  BACA / TULIS FILE JSON
+//  BACA / TULIS VIA VERCEL BLOB
+//  (sebelumnya fs.readFileSync/writeFileSync — DIGANTI karena
+//  filesystem Vercel read-only. getContent()/saveContent() sekarang
+//  ASYNC, semua pemanggilnya WAJIB pakai await.)
 // =========================================================
 
-const DATA_PATH = path.join(process.cwd(), 'src', 'data', 'site-content.json');
+const BLOB_PATH = 'data/site-content.json';
 
-/** Ambil konten situs. Jika file belum ada, buat dari DEFAULT_CONTENT. */
-export function getContent(): SiteContent {
-  try {
-    if (!fs.existsSync(DATA_PATH)) {
-      saveContent(DEFAULT_CONTENT);
-      return DEFAULT_CONTENT;
-    }
-    const raw = fs.readFileSync(DATA_PATH, 'utf-8');
-    const parsed = JSON.parse(raw) as Partial<SiteContent>;
-    // Merge dangkal supaya field baru dari DEFAULT_CONTENT tetap ada
-    return {
-      hero: parsed.hero ?? DEFAULT_CONTENT.hero,
-      showcase: parsed.showcase ?? DEFAULT_CONTENT.showcase,
-      drinks: parsed.drinks ?? DEFAULT_CONTENT.drinks,
-      story: parsed.story ?? DEFAULT_CONTENT.story,
-      articles: parsed.articles ?? DEFAULT_CONTENT.articles,
-      site: { ...DEFAULT_CONTENT.site, ...(parsed.site ?? {}) },
-    };
-  } catch {
+/** Ambil konten situs. Jika belum pernah disimpan, buat dari DEFAULT_CONTENT. */
+export async function getContent(): Promise<SiteContent> {
+  const saved = await readJson<Partial<SiteContent>>(BLOB_PATH);
+  if (!saved) {
+    await saveContent(DEFAULT_CONTENT);
     return DEFAULT_CONTENT;
   }
+  // Merge dangkal supaya field baru dari DEFAULT_CONTENT tetap ada
+  return {
+    hero: saved.hero ?? DEFAULT_CONTENT.hero,
+    showcase: saved.showcase ?? DEFAULT_CONTENT.showcase,
+    drinks: saved.drinks ?? DEFAULT_CONTENT.drinks,
+    story: saved.story ?? DEFAULT_CONTENT.story,
+    articles: saved.articles ?? DEFAULT_CONTENT.articles,
+    site: { ...DEFAULT_CONTENT.site, ...(saved.site ?? {}) },
+  };
 }
 
-/** Simpan konten situs ke file JSON (dipakai admin API). */
-export function saveContent(content: SiteContent): void {
-  const dir = path.dirname(DATA_PATH);
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-  fs.writeFileSync(DATA_PATH, JSON.stringify(content, null, 2), 'utf-8');
+/** Simpan konten situs (dipakai admin API). */
+export async function saveContent(content: SiteContent): Promise<void> {
+  await writeJson(BLOB_PATH, content);
 }

@@ -1,7 +1,6 @@
 import 'server-only';
-import fs from 'fs';
-import path from 'path';
 import crypto from 'crypto';
+import { readJson, writeJson, listBlobs } from './blob';
 
 // ── Types ─────────────────────────────────────────────────
 export type PageviewRecord = {
@@ -29,30 +28,28 @@ export type AnalyticsSummary = {
   devices: { desktop: number; mobile: number; tablet: number };
 };
 
-// ── Storage ───────────────────────────────────────────────
-const DATA_DIR = path.join(process.cwd(), 'src', 'data', 'analytics');
+// ── Storage (Vercel Blob, 1 blob per hari — sebelumnya 1 file JSON per hari
+//    di disk lokal, sekarang persis sama tapi di Blob) ──────
+const PREFIX = 'analytics/';
 
 function todayKey() {
   return new Date().toISOString().slice(0, 10); // "YYYY-MM-DD"
 }
 
-function dayFile(date: string) {
-  return path.join(DATA_DIR, `${date}.json`);
+function dayPath(date: string) {
+  return `${PREFIX}${date}.json`;
 }
 
-function readDay(date: string): PageviewRecord[] {
-  const f = dayFile(date);
-  if (!fs.existsSync(f)) return [];
-  try { return JSON.parse(fs.readFileSync(f, 'utf-8')); }
-  catch { return []; }
+async function readDay(date: string): Promise<PageviewRecord[]> {
+  const records = await readJson<PageviewRecord[]>(dayPath(date));
+  return records ?? [];
 }
 
-function appendRecord(record: PageviewRecord) {
-  if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
-  const f = dayFile(todayKey());
-  const records = readDay(todayKey());
+async function appendRecord(record: PageviewRecord): Promise<void> {
+  const today = todayKey();
+  const records = await readDay(today);
   records.push(record);
-  fs.writeFileSync(f, JSON.stringify(records), 'utf-8');
+  await writeJson(dayPath(today), records);
 }
 
 // ── Helpers ───────────────────────────────────────────────
@@ -81,14 +78,14 @@ const IGNORE_PATHS = ['/admin', '/api', '/_next', '/favicon', '/assets'];
 // ── Public API ────────────────────────────────────────────
 
 /** Record a single pageview. Called from middleware / API route. */
-export function trackPageview(opts: {
+export async function trackPageview(opts: {
   path: string;
   ip: string;
   ua: string;
   ref: string;
-}): void {
+}): Promise<void> {
   if (IGNORE_PATHS.some((p) => opts.path.startsWith(p))) return;
-  appendRecord({
+  await appendRecord({
     ts: Date.now(),
     path: opts.path,
     ref: shortenRef(opts.ref),
@@ -98,25 +95,25 @@ export function trackPageview(opts: {
 }
 
 /** Compute analytics summary for the dashboard. */
-export function getAnalyticsSummary(days = 30): AnalyticsSummary {
-  if (!fs.existsSync(DATA_DIR)) {
-    return { totalViews: 0, totalUnique: 0, todayViews: 0, todayUnique: 0, topPages: [], daily: [], devices: { desktop: 0, mobile: 0, tablet: 0 } };
-  }
-
+export async function getAnalyticsSummary(days = 30): Promise<AnalyticsSummary> {
   const today = todayKey();
   const daily: DaySummary[] = [];
   let totalViews = 0;
-  let totalUnique = 0;
   const globalUniqueIPs = new Set<string>();
   const pageCountAll: Record<string, number> = {};
   const devices = { desktop: 0, mobile: 0, tablet: 0 };
 
+  // Baca semua hari paralel (lebih cepat daripada satu-satu berurutan)
+  const dates: string[] = [];
   for (let i = 0; i < days; i++) {
     const d = new Date();
     d.setDate(d.getDate() - i);
-    const date = d.toISOString().slice(0, 10);
-    const records = readDay(date);
+    dates.push(d.toISOString().slice(0, 10));
+  }
+  const allRecords = await Promise.all(dates.map((date) => readDay(date)));
 
+  dates.forEach((date, i) => {
+    const records = allRecords[i];
     const dayIPs = new Set<string>();
     const dayPages: Record<string, number> = {};
 
@@ -132,10 +129,9 @@ export function getAnalyticsSummary(days = 30): AnalyticsSummary {
     if (records.length > 0 || i === 0) {
       daily.push({ date, views: records.length, unique: dayIPs.size, pages: dayPages });
     }
-  }
+  });
 
-  totalUnique = globalUniqueIPs.size;
-
+  const totalUnique = globalUniqueIPs.size;
   const todayData = daily.find((d) => d.date === today);
 
   const topPages = Object.entries(pageCountAll)

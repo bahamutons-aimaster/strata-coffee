@@ -1,6 +1,5 @@
 import 'server-only';
-import fs from 'fs';
-import path from 'path';
+import { readJson, writeJson, listBlobs } from './blob';
 
 export type Lead = {
   id: string;
@@ -16,47 +15,44 @@ export type Lead = {
   status: 'new' | 'read' | 'replied' | 'done';
 };
 
-const LEADS_PATH = path.join(process.cwd(), 'src', 'data', 'leads.json');
+/**
+ * Setiap lead disimpan sebagai blob TERPISAH (leads/{id}.json), bukan satu
+ * file array besar seperti sebelumnya. Ini sengaja — kalau semua lead nimpuk
+ * di satu file, dua orang submit form barengan bisa saling timpa (yang satu
+ * "menang" race condition, lead yang lain hilang). Dengan 1 file per lead,
+ * submit baru gak pernah nabrak submit lain.
+ */
+const PREFIX = 'leads/';
 
-function readLeads(): Lead[] {
-  try {
-    if (!fs.existsSync(LEADS_PATH)) return [];
-    return JSON.parse(fs.readFileSync(LEADS_PATH, 'utf-8')) as Lead[];
-  } catch {
-    return [];
-  }
+function leadPath(id: string) {
+  return `${PREFIX}${id}.json`;
 }
 
-function writeLeads(leads: Lead[]): void {
-  const dir = path.dirname(LEADS_PATH);
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-  fs.writeFileSync(LEADS_PATH, JSON.stringify(leads, null, 2), 'utf-8');
-}
-
-export function getAllLeads(): Lead[] {
-  return readLeads().sort(
-    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+export async function getAllLeads(): Promise<Lead[]> {
+  const blobs = await listBlobs(PREFIX);
+  const leads = await Promise.all(
+    blobs.map((b) => readJson<Lead>(b.pathname))
   );
+  return leads
+    .filter((l): l is Lead => l !== null)
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 }
 
-export function saveLead(data: Omit<Lead, 'id' | 'createdAt' | 'status'>): Lead {
-  const leads = readLeads();
+export async function saveLead(data: Omit<Lead, 'id' | 'createdAt' | 'status'>): Promise<Lead> {
   const lead: Lead = {
     id: `lead-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
     createdAt: new Date().toISOString(),
     status: 'new',
     ...data,
   };
-  leads.push(lead);
-  writeLeads(leads);
+  await writeJson(leadPath(lead.id), lead);
   return lead;
 }
 
-export function updateLeadStatus(id: string, status: Lead['status']): boolean {
-  const leads = readLeads();
-  const idx = leads.findIndex((l) => l.id === id);
-  if (idx === -1) return false;
-  leads[idx].status = status;
-  writeLeads(leads);
+export async function updateLeadStatus(id: string, status: Lead['status']): Promise<boolean> {
+  const lead = await readJson<Lead>(leadPath(id));
+  if (!lead) return false;
+  lead.status = status;
+  await writeJson(leadPath(id), lead);
   return true;
 }

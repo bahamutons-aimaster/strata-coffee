@@ -7,8 +7,8 @@ import { LatestNews } from '@/components/LatestNews';
 import { VisitBlock } from '@/components/VisitBlock';
 import { getContent } from '@/lib/content';
 
-export default function HomePage() {
-  const content = getContent();
+export default async function HomePage() {
+  const content = await getContent();
 
   const featuredDrinks = content.drinks.filter((d) => d.featured);
   const drinksToShow = featuredDrinks.length > 0

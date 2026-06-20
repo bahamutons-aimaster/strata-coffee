@@ -3,13 +3,14 @@ import { getContent } from '@/lib/content';
 import { ArticleClient } from './ArticleClient';
 
 export async function generateStaticParams() {
-  const { articles } = getContent();
+  const { articles } = await getContent();
   return articles.map((a) => ({ slug: a.slug }));
 }
 
-export async function generateMetadata({ params }: { params: { slug: string } }) {
-  const { articles } = getContent();
-  const article = articles.find((a) => a.slug === params.slug);
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const { articles } = await getContent();
+  const article = articles.find((a) => a.slug === slug);
   if (!article) return {};
   return {
     title: `${article.title} — Strata Coffee`,
@@ -17,9 +18,10 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   };
 }
 
-export default function ArticlePage({ params }: { params: { slug: string } }) {
-  const { articles } = getContent();
-  const article = articles.find((a) => a.slug === params.slug);
+export default async function ArticlePage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const { articles } = await getContent();
+  const article = articles.find((a) => a.slug === slug);
   if (!article) notFound();
 
   const related = articles

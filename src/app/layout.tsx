@@ -32,12 +32,12 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { site } = getContent();
+  const { site } = await getContent();
   return (
     <html
       lang="id"

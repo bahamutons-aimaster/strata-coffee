@@ -1,22 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
+import { checkPassword, setAuthCookie, clearAuthCookie } from '@/lib/auth';
 
 export async function POST(req: NextRequest) {
-  const { password } = await req.json();
-  const expected = process.env.ADMIN_TOKEN ?? 'strata2026';
-  if (password !== expected) {
-    return NextResponse.json({ error: 'Wrong password' }, { status: 401 });
+  let body: { password?: string };
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: 'Body tidak valid' }, { status: 400 });
   }
-  cookies().set('sc_admin', expected, {
-    httpOnly: true,
-    path: '/',
-    maxAge: 60 * 60 * 24 * 7, // 7 hari
-    sameSite: 'lax',
-  });
-  return NextResponse.json({ ok: true });
+
+  if (!checkPassword(body.password ?? '')) {
+    return NextResponse.json({ error: 'Password salah' }, { status: 401 });
+  }
+
+  const res = NextResponse.json({ ok: true });
+  setAuthCookie(res, body.password!); // password udah divalidasi sama dengan ADMIN_TOKEN
+  return res;
 }
 
 export async function DELETE() {
-  cookies().delete('sc_admin');
-  return NextResponse.json({ ok: true });
+  const res = NextResponse.json({ ok: true });
+  clearAuthCookie(res);
+  return res;
 }
